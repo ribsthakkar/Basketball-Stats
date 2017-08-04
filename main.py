@@ -1,6 +1,11 @@
 import Tkinter as tk
 import ttk
 from PIL import ImageTk,Image
+from team import *
+import sqlite3
+conn = sqlite3.connect('roster.db')
+c = conn.cursor()
+
 
 class MainGUI(tk.Frame):
     tlCount = 0
@@ -36,8 +41,35 @@ class MainGUI(tk.Frame):
             top = tk.Toplevel(parent)
             self.tlCount+=1
             top.title("Create a Team")
+            top.minsize(width=300,height=100)
+            top.resizable(False,False)
+
+            tk.Label(top, text="First Name").grid(row=0)
+            tk.Label(top, text="Last Name").grid(row=1)
+            tk.Label(top, text="Jersey Number").grid(row=2)
+            fN = tk.Entry(top)
+            lN = tk.Entry(top)
+            jN = tk.Entry(top)
+
+            fN.grid(row=0, column=1)
+            lN.grid(row=1, column=1)
+            jN.grid(row=2, column = 1)
+
+
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
-            quitButton.place(x=10,y=10)
+            quitButton.grid(row = 4,column = 4)
+            submitButton = tk.Button(top,text="Submit",command=lambda:addPlayer(fN.get(),lN.get(),jN.get()))
+            submitButton.grid(row=4,column = 2)
+            def addPlayer(fName,lName,jNum):
+                if(len(fName)==0 or len(lName)==0 or len(jNum)==0):
+                    print("There is number(s) in your name, letter(s) in your jersey number slot, or not all of the slots are filled!")
+                else:
+                    newPlayer = Team(lName,fName,jNum)
+                    c.execute("INSERT INTO roster VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",(newPlayer.firstName,newPlayer.lastName,newPlayer.number,0,0,0,0,0,0,0,0,0,0,0,0,0))
+                    conn.commit()
+                    print(newPlayer.firstName + " " + newPlayer.lastName + " #"+ newPlayer.number)
+                    self.topDestroy(top)
+                    self.tlCount = 0
         parent.deiconify()
         print("return to main")
     def Create(self,parent):
@@ -73,6 +105,8 @@ class MainGUI(tk.Frame):
             quitButton.place(x=10,y=10)
         parent.deiconify()
         print("return to main")
+
+
     def topDestroy(self,top):
         top.destroy()
         self.tlCount=0
@@ -84,3 +118,6 @@ if __name__ == '__main__':
     root.title("Home")
     my_gui = MainGUI(root)
     root.mainloop()
+    c.execute("SELECT * FROM roster")
+    print(c.fetchall())
+    conn.close()
