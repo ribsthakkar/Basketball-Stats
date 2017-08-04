@@ -5,6 +5,7 @@ from team import *
 import sqlite3
 conn = sqlite3.connect('roster.db')
 c = conn.cursor()
+c.execute("SELECT * FROM roster")
 
 
 class MainGUI(tk.Frame):
@@ -34,6 +35,7 @@ class MainGUI(tk.Frame):
         createButton.place(x = 240, y = 180)
         loadButton.place(x = 230, y = 240)
         viewButton.place(x = 225, y = 300)
+        parent.protocol("WM_DELETE_WINDOW", lambda:quit())
     def Team(self,parent):
         print("Team Created")
         parent.withdraw()
@@ -43,7 +45,7 @@ class MainGUI(tk.Frame):
             top.title("Create a Team")
             top.minsize(width=300,height=100)
             top.resizable(False,False)
-
+            top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
             tk.Label(top, text="First Name").grid(row=0)
             tk.Label(top, text="Last Name").grid(row=1)
             tk.Label(top, text="Jersey Number").grid(row=2)
@@ -70,6 +72,7 @@ class MainGUI(tk.Frame):
                     print(newPlayer.firstName + " " + newPlayer.lastName + " #"+ newPlayer.number)
                     self.topDestroy(top)
                     self.tlCount = 0
+            top.mainloop()
         parent.deiconify()
         print("return to main")
     def Create(self,parent):
@@ -78,9 +81,49 @@ class MainGUI(tk.Frame):
         if(self.tlCount==0):
             top = tk.Toplevel(parent)
             self.tlCount+=1
-            top.title("Create a Team")
+            top.protocol("WM_DELETE_WINDOW", lambda:top.destroy())
+            top.title("Create a game")
+            top.minsize(width=1000,height=750)
+            top.resizable(False,False)
+            completeButton = tk.Button(top,text="End Game").grid(row=1,column=18)
+            saveButton = tk.Button(top,text="Save").grid(row=2,column=18)
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
-            quitButton.place(x=10,y=10)
+            addReb = tk.Button(top,text="Add Rebound").grid(row=18,column=18)
+            delReb = tk.Button(top,text="Delete Rebound").grid(row=19,column=18)
+            addStl = tk.Button(top,text="Add Steal").grid(row=20,column=18)
+            delStl = tk.Button(top,text="Delete Steal").grid(row=21,column=18)
+            addBlk = tk.Button(top,text="Add Block").grid(row=22,column=18)
+            delBlk = tk.Button(top,text="Delete Block").grid(row=23,column=18)
+            addAst = tk.Button(top,text="Add Assist").grid(row=24,column=18)
+            delAst = tk.Button(top,text="Delete Assist").grid(row=25,column=18)
+            addFls = tk.Button(top,text="Add Foul").grid(row=26,column=18)
+            delFls = tk.Button(top,text="Delete Foul").grid(row=27,column=18)
+            addTo = tk.Button(top,text="Add Turnover").grid(row=28,column=18)
+            delTo = tk.Button(top,text="Delete Turnover").grid(row=29,column=18)
+            canvas = tk.Canvas(top, width = 848, height = 449)
+            canvas.grid(row=0,column=0,rowspan=17,columnspan = 17)
+            self.img = ImageTk.PhotoImage(Image.open('court.png'))
+            iLabel = tk.Label(top,image = self.img)
+            canvas.create_image(0,0,image=self.img,anchor="nw")
+            playerList = []
+            namesList=[]
+            increment = 0
+            for dbPlayer in dbPlayerList:
+                pList = list(dbPlayer)
+                x = Team(pList[1],pList[0],pList[2])
+                print(x.printInfo())
+                playerList.append(x)
+            for player in playerList:
+                namesList.append(player.printInfo())
+            for text in namesList:
+                b = tk.Radiobutton(top, text=text, value=text)
+                b.grid(row=18+increment,column=0,columnspan=2,sticky="w")
+                increment+=1
+            def printcoords(event):
+                print (event.x,event.y)
+            canvas.bind("<Button-1>",printcoords)
+            quitButton.grid(row=3,column=18)
+            top.mainloop()
         parent.deiconify()
         print("return to main")
     def Load(self,parent):
@@ -90,8 +133,10 @@ class MainGUI(tk.Frame):
             top = tk.Toplevel(parent)
             self.tlCount+=1
             top.title("Create a Team")
+            top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
             quitButton.place(x=10,y=10)
+            top.mainloop()
         parent.deiconify()
         print("return to main")
     def View(self,parent):
@@ -101,21 +146,27 @@ class MainGUI(tk.Frame):
             top = tk.Toplevel(parent)
             self.tlCount+=1
             top.title("Create a Team")
+            top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
             quitButton.place(x=10,y=10)
+            top.mainloop()
         parent.deiconify()
         print("return to main")
-
-
     def topDestroy(self,top):
         top.destroy()
         self.tlCount=0
+        parent = tk.Toplevel()
+        parent.title("Home")
+        my_gui = MainGUI(parent)
+        parent.mainloop()
 
 
 
 if __name__ == '__main__':
     root = tk.Tk()
     root.title("Home")
+    c.execute("SELECT * FROM roster")
+    dbPlayerList = list(c.fetchall())
     my_gui = MainGUI(root)
     root.mainloop()
     c.execute("SELECT * FROM roster")

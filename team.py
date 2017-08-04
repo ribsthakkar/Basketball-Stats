@@ -23,8 +23,8 @@ import sqlite3
 class Team:
     rosterCount = 0
     def __init__(self,lastName,firstName,number):
-        conn = sqlite3.connect('roster.db')
-        c = conn.cursor()
+        #conn = sqlite3.connect('roster.db')
+        #c = conn.cursor()
         self.firstName=firstName
         self.lastName=lastName
         self.number = number
@@ -42,8 +42,8 @@ class Team:
         fls = 0
         pm = 0
 
-        conn.commit()
-        conn.close()
+        #conn.commit()
+        #conn.close()
     def calcPts(self):
         return 2*self.twoMd + 3*self.threeMd + self.ftMd
     def calc3Per(self):
@@ -61,3 +61,5 @@ class Team:
             return ftMd/ftAtt
         else:
             return 0
+    def printInfo(self):
+        return "Name & Jersey Number: "+ self.firstName+" "+ self.lastName+" #"+self.number
