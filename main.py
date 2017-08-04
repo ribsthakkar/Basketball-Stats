@@ -10,6 +10,7 @@ c.execute("SELECT * FROM roster")
 
 class MainGUI(tk.Frame):
     tlCount = 0
+    increment = 0
     def __init__(self, parent,*args,**kwargs):
         tk.Frame.__init__(self, parent,*args,**kwargs)
         #self.pack()
@@ -79,12 +80,14 @@ class MainGUI(tk.Frame):
         print("Game Created")
         parent.withdraw()
         if(self.tlCount==0):
+            parent.withdraw()
             top = tk.Toplevel(parent)
             self.tlCount+=1
-            top.protocol("WM_DELETE_WINDOW", lambda:top.destroy())
+            top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
             top.title("Create a game")
             top.minsize(width=1000,height=750)
             top.resizable(False,False)
+            updater = Team(None,None,None)
             completeButton = tk.Button(top,text="End Game").grid(row=1,column=18)
             saveButton = tk.Button(top,text="Save").grid(row=2,column=18)
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
@@ -107,24 +110,28 @@ class MainGUI(tk.Frame):
             canvas.create_image(0,0,image=self.img,anchor="nw")
             playerList = []
             namesList=[]
-            increment = 0
+            increment = tk.IntVar()
+            index = 0
+            def sel():
+                #index = playerList.index(player)
+                print(playerList[increment.get()].printInfo())
             for dbPlayer in dbPlayerList:
                 pList = list(dbPlayer)
                 x = Team(pList[1],pList[0],pList[2])
                 print(x.printInfo())
                 playerList.append(x)
             for player in playerList:
-                namesList.append(player.printInfo())
-            for text in namesList:
-                b = tk.Radiobutton(top, text=text, value=text)
-                b.grid(row=18+increment,column=0,columnspan=2,sticky="w")
-                increment+=1
+                b = tk.Radiobutton(top, text=player.printInfo(), value=playerList.index(player),variable=increment,command=lambda:sel(),indicatoron=0)
+                b.grid(row=18+self.increment,column=0,columnspan=2,sticky="w")
+                self.increment+=1
             def printcoords(event):
                 print (event.x,event.y)
+                #print(updater.printInfo())
             canvas.bind("<Button-1>",printcoords)
             quitButton.grid(row=3,column=18)
             top.mainloop()
-        parent.deiconify()
+        #parent.deiconify()
+        self.increment =0
         print("return to main")
     def Load(self,parent):
         print ("Loading Game")
