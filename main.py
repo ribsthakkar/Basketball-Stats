@@ -3,6 +3,7 @@ import ttk
 from PIL import ImageTk,Image
 from team import *
 import sqlite3
+import math
 conn = sqlite3.connect('roster.db')
 c = conn.cursor()
 c.execute("SELECT * FROM roster")
@@ -10,7 +11,6 @@ c.execute("SELECT * FROM roster")
 
 class MainGUI(tk.Frame):
     tlCount = 0
-    increment = 0
     def __init__(self, parent,*args,**kwargs):
         tk.Frame.__init__(self, parent,*args,**kwargs)
         #self.pack()
@@ -61,8 +61,9 @@ class MainGUI(tk.Frame):
 
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
             quitButton.grid(row = 4,column = 4)
-            submitButton = tk.Button(top,text="Submit",command=lambda:addPlayer(fN.get(),lN.get(),jN.get()))
-            submitButton.grid(row=4,column = 2)
+            if(team.rosterCount<=15):
+                submitButton = tk.Button(top,text="Submit",command=lambda:addPlayer(fN.get(),lN.get(),jN.get()))
+                submitButton.grid(row=4,column = 2)
             def addPlayer(fName,lName,jNum):
                 if(len(fName)==0 or len(lName)==0 or len(jNum)==0):
                     print("There is number(s) in your name, letter(s) in your jersey number slot, or not all of the slots are filled!")
@@ -79,6 +80,12 @@ class MainGUI(tk.Frame):
     def Create(self,parent):
         print("Game Created")
         parent.withdraw()
+        playerList = []
+        for dbPlayer in dbPlayerList:
+            pList = list(dbPlayer)
+            x = Team(pList[1],pList[0],pList[2])
+            print(x.printInfo())
+            playerList.append(x)
         if(self.tlCount==0):
             parent.withdraw()
             top = tk.Toplevel(parent)
@@ -87,51 +94,168 @@ class MainGUI(tk.Frame):
             top.title("Create a game")
             top.minsize(width=1000,height=750)
             top.resizable(False,False)
-            updater = Team(None,None,None)
+            def addRebound():
+                playerList[var.get()].upReb()
+                print(playerList[var.get()].reb)
+                tk.Label(top, text=playerList[var.get()].reb).grid(row=18+var.get()+1,column=8,sticky="e")
+            def delRebound():
+                playerList[var.get()].downReb()
+                tk.Label(top, text=playerList[var.get()].reb).grid(row=18+var.get()+1,column=8,sticky="e")
+            def addSteal():
+                playerList[var.get()].upStl()
+                tk.Label(top, text=playerList[var.get()].stl).grid(row=18+var.get()+1,column=9,sticky="e")
+            def delSteal():
+                playerList[var.get()].downStl()
+                tk.Label(top, text=playerList[var.get()].stl).grid(row=18+var.get()+1,column=9,sticky="e")
+            def addBlock():
+                playerList[var.get()].upBlk()
+                tk.Label(top, text=playerList[var.get()].blk).grid(row=18+var.get()+1,column=10,sticky="e")
+            def delBlock():
+                playerList[var.get()].downBlk()
+                tk.Label(top, text=playerList[var.get()].blk).grid(row=18+var.get()+1,column=10,sticky="e")
+            def addAssist():
+                playerList[var.get()].upAst()
+                tk.Label(top, text=playerList[var.get()].ast).grid(row=18+var.get()+1,column=11,sticky="e")
+            def delAssist():
+                playerList[var.get()].downAst()
+                tk.Label(top, text=playerList[var.get()].ast).grid(row=18+var.get()+1,column=11,sticky="e")
+            def addFoul():
+                playerList[var.get()].upFls()
+                tk.Label(top, text=playerList[var.get()].fls).grid(row=18+var.get()+1,column=12,sticky="e")
+            def delFoul():
+                playerList[var.get()].downFls()
+                tk.Label(top, text=playerList[var.get()].fls).grid(row=18+var.get()+1,column=12,sticky="e")
+            def addTurnover():
+                playerList[var.get()].upTo()
+                tk.Label(top, text=playerList[var.get()].to).grid(row=18+var.get()+1,column=13,sticky="e")
+            def delTurnover():
+                playerList[var.get()].downTo()
+                tk.Label(top, text=playerList[var.get()].to).grid(row=18+var.get()+1,column=13,sticky="e")
+            def addFreeThrow():
+                playerList[var.get()].upFT()
+                tk.Label(top, text=playerList[var.get()].ftMd).grid(row=18+var.get()+1,column=6,sticky="e")
+                tk.Label(top, text=playerList[var.get()].ftAtt).grid(row=18+var.get()+1,column=7,sticky="e")
+            def delFreeThrow():
+                playerList[var.get()].downFT()
+                tk.Label(top, text=playerList[var.get()].ftMd).grid(row=18+var.get()+1,column=6,sticky="e")
+                tk.Label(top, text=playerList[var.get()].ftAtt).grid(row=18+var.get()+1,column=7,sticky="e")
+            def addFreeThrowM():
+                playerList[var.get()].upFTM()
+                tk.Label(top, text=playerList[var.get()].ftMd).grid(row=18+var.get()+1,column=6,sticky="e")
+                tk.Label(top, text=playerList[var.get()].ftAtt).grid(row=18+var.get()+1,column=7,sticky="e")
+            def delFreeThrowM():
+                playerList[var.get()].downFTM()
+                tk.Label(top, text=playerList[var.get()].ftMd).grid(row=18+var.get()+1,column=6,sticky="e")
+                tk.Label(top, text=playerList[var.get()].ftAtt).grid(row=18+var.get()+1,column=7,sticky="e")
             completeButton = tk.Button(top,text="End Game").grid(row=1,column=18)
             saveButton = tk.Button(top,text="Save").grid(row=2,column=18)
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
-            addReb = tk.Button(top,text="Add Rebound").grid(row=18,column=18)
-            delReb = tk.Button(top,text="Delete Rebound").grid(row=19,column=18)
-            addStl = tk.Button(top,text="Add Steal").grid(row=20,column=18)
-            delStl = tk.Button(top,text="Delete Steal").grid(row=21,column=18)
-            addBlk = tk.Button(top,text="Add Block").grid(row=22,column=18)
-            delBlk = tk.Button(top,text="Delete Block").grid(row=23,column=18)
-            addAst = tk.Button(top,text="Add Assist").grid(row=24,column=18)
-            delAst = tk.Button(top,text="Delete Assist").grid(row=25,column=18)
-            addFls = tk.Button(top,text="Add Foul").grid(row=26,column=18)
-            delFls = tk.Button(top,text="Delete Foul").grid(row=27,column=18)
-            addTo = tk.Button(top,text="Add Turnover").grid(row=28,column=18)
-            delTo = tk.Button(top,text="Delete Turnover").grid(row=29,column=18)
+            addReb = tk.Button(top,text="Add Rebound",command=addRebound).grid(row=18-3,column=18)
+            delReb = tk.Button(top,text="Delete Rebound",command=delRebound).grid(row=19-3,column=18)
+            addStl = tk.Button(top,text="Add Steal",command=addSteal).grid(row=20-3,column=18)
+            delStl = tk.Button(top,text="Delete Steal",command=delSteal).grid(row=21-3,column=18)
+            addBlk = tk.Button(top,text="Add Block",command=addBlock).grid(row=22-3,column=18)
+            delBlk = tk.Button(top,text="Delete Block",command=delBlock).grid(row=23-3,column=18)
+            addAst = tk.Button(top,text="Add Assist",command=addAssist).grid(row=24-3,column=18)
+            delAst = tk.Button(top,text="Delete Assist",command=delAssist).grid(row=25-3,column=18)
+            addFls = tk.Button(top,text="Add Foul",command=addFoul).grid(row=26-3,column=18)
+            delFls = tk.Button(top,text="Delete Foul",command=delFoul).grid(row=27-3,column=18)
+            addTo = tk.Button(top,text="Add Turnover",command=addTurnover).grid(row=28-3,column=18)
+            delTo = tk.Button(top,text="Delete Turnover",command=delTurnover).grid(row=29-3,column=18)
+            addFt = tk.Button(top,text="Add Free Throw",command=addFreeThrow).grid(row=30-3,column=18)
+            delFt = tk.Button(top,text="Delete Free Throw",command=delFreeThrow).grid(row=31-3,column=18)
+            addFtM = tk.Button(top,text="Add Free Throw Miss",command=addFreeThrowM).grid(row=32-3,column=18)
+            delFtM = tk.Button(top,text="Delete Free THrow Miss",command=delFreeThrowM).grid(row=33-3,column=18)
+            nameLabel = tk.Label(top,text="Name/Number",font = ("AmericanTypewriter-Bold")).grid(row=18,column=0,columnspan=2)
+            twoMdLabel = tk.Label(top,text="2pt Made",font = ("AmericanTypewriter-Bold")).grid(row=18,column=2)
+            twoAttLabel = tk.Label(top,text="2pt Attempt",font = ("AmericanTypewriter-Bold")).grid(row=18,column=3)
+            threeMdLabel = tk.Label(top,text="3pt Made",font = ("AmericanTypewriter-Bold")).grid(row=18,column=4)
+            threeAttLabel = tk.Label(top,text="3pt Attempt",font = ("AmericanTypewriter-Bold")).grid(row=18,column=5)
+            ftMdLabel = tk.Label(top,text="FT Made",font = ("AmericanTypewriter-Bold")).grid(row=18,column=6)
+            ftAttLabel = tk.Label(top,text="FT Attempt",font = ("AmericanTypewriter-Bold")).grid(row=18,column=7)
+            rebLabel = tk.Label(top,text="Rebounds",font = ("AmericanTypewriter-Bold")).grid(row=18,column=8)
+            stlLabel = tk.Label(top,text="Steals",font = ("AmericanTypewriter-Bold")).grid(row=18,column=9)
+            blkLabel = tk.Label(top,text="Blocks",font = ("AmericanTypewriter-Bold")).grid(row=18,column=10)
+            astLabel = tk.Label(top,text="Assists",font = ("AmericanTypewriter-Bold")).grid(row=18,column=11)
+            toLabel = tk.Label(top,text="Turnovers",font = ("AmericanTypewriter-Bold")).grid(row=18,column=12)
+            flsLabel = tk.Label(top,text="Fouls",font = ("AmericanTypewriter-Bold")).grid(row=18,column=13)
             canvas = tk.Canvas(top, width = 848, height = 449)
             canvas.grid(row=0,column=0,rowspan=17,columnspan = 17)
             self.img = ImageTk.PhotoImage(Image.open('court.png'))
             iLabel = tk.Label(top,image = self.img)
             canvas.create_image(0,0,image=self.img,anchor="nw")
-            playerList = []
-            namesList=[]
-            increment = tk.IntVar()
+            var = tk.IntVar()
+            half = tk.IntVar()
+            increment = 0
             index = 0
             def sel():
-                #index = playerList.index(player)
-                print(playerList[increment.get()].printInfo())
-            for dbPlayer in dbPlayerList:
-                pList = list(dbPlayer)
-                x = Team(pList[1],pList[0],pList[2])
-                print(x.printInfo())
-                playerList.append(x)
+                print(playerList[var.get()].printInfo())
             for player in playerList:
-                b = tk.Radiobutton(top, text=player.printInfo(), value=playerList.index(player),variable=increment,command=lambda:sel(),indicatoron=0)
-                b.grid(row=18+self.increment,column=0,columnspan=2,sticky="w")
-                self.increment+=1
-            def printcoords(event):
+                b = tk.Radiobutton(top, text=player.printInfo(), value=playerList.index(player),variable=var,command=lambda:sel(),indicatoron=0)
+                b.grid(row=19+increment,column=0,columnspan=2,sticky="w")
+                increment+=1
+            increment = 0
+            rebund = 0
+            for player in playerList:
+                b1 = tk.Label(top, text=player.twoMd,)
+                b2 = tk.Label(top, text=player.twoAtt)
+                b3 = tk.Label(top, text=player.threeMd)
+                b4 = tk.Label(top, text=player.threeAtt)
+                b5 = tk.Label(top, text=player.ftMd)
+                b6 = tk.Label(top, text=player.ftAtt)
+                b7 = tk.Label(top, text=player.reb)
+                b8 = tk.Label(top, text=player.stl)
+                b9 = tk.Label(top, text=player.blk)
+                b10 = tk.Label(top, text=player.ast)
+                b11 = tk.Label(top, text=player.to)
+                b12 = tk.Label(top, text=player.fls)
+                b1.grid(row=19+increment,column=2,columnspan=1,sticky="e")
+                b2.grid(row=19+increment,column=3,columnspan=1,sticky="e")
+                b3.grid(row=19+increment,column=4,columnspan=1,sticky="e")
+                b4.grid(row=19+increment,column=5,columnspan=1,sticky="e")
+                b5.grid(row=19+increment,column=6,columnspan=1,sticky="e")
+                b6.grid(row=19+increment,column=7,columnspan=1,sticky="e")
+                b7.grid(row=19+increment,column=8,columnspan=1,sticky="e")
+                b8.grid(row=19+increment,column=9,columnspan=1,sticky="e")
+                b9.grid(row=19+increment,column=10,columnspan=1,sticky="e")
+                b10.grid(row=19+increment,column=11,columnspan=1,sticky="e")
+                b11.grid(row=19+increment,column=12,columnspan=1,sticky="e")
+                b12.grid(row=19+increment,column=13,columnspan=1,sticky="e")
+                increment+=1
+            half1 = tk.Radiobutton(top,text="First Half", value = 1,variable=half).grid(row=3,column=18)
+            half2 = tk.Radiobutton(top,text="Second Half", value = 2,variable=half).grid(row=4,column=18)
+            def printcoordsL(event):
+                print("LeftClick")
+                print (type(event.x))
+                if((event.x<=50 and (event.y>40 and event.y<400)) or(math.sqrt((event.x - 50)**2 + (event.y - 220)**2)<170) and event.x<420) or ((event.x>=750 and (event.y>40 and event.y<400)) or (math.sqrt((event.x - 792)**2 + (event.y - 220)**2)<170) and event.x>420):
+                    playerList[var.get()].up2Pt()
+                    print("Here")
+                    print(playerList[var.get()].twoMd)
+                    print(playerList[var.get()].twoAtt)
+                    tk.Label(top, text=playerList[var.get()].twoMd).grid(row=18+var.get()+1,column=2,sticky="e")
+                    tk.Label(top, text=playerList[var.get()].twoAtt).grid(row=18+var.get()+1,column=3,sticky="e")
+                else:
+                    print("not here")
+                    playerList[var.get()].up3Pt()
+                    print(playerList[var.get()].threeMd)
+                    print(playerList[var.get()].threeAtt)
+                    tk.Label(top, text=playerList[var.get()].threeMd).grid(row=18+var.get()+1,column=4,sticky="e")
+                    tk.Label(top, text=playerList[var.get()].threeAtt).grid(row=18+var.get()+1,column=5,sticky="e")
+            def printcoordsR(event):
+                print("RightClick")
                 print (event.x,event.y)
-                #print(updater.printInfo())
-            canvas.bind("<Button-1>",printcoords)
+                if((event.x<=50 and (event.y>40 and event.y<400))or(math.sqrt((event.x - 50)**2 + (event.y - 220)**2)<170) and event.x<420) or ((event.x>=750 and (event.y>40 and event.y<400)) or (math.sqrt((event.x - 792)**2 + (event.y - 220)**2)<170) and event.x>420):
+                    playerList[var.get()].up2PtM()
+                    tk.Label(top, text=playerList[var.get()].twoMd).grid(row=18+var.get()+1,column=2,sticky="e")
+                    tk.Label(top, text=playerList[var.get()].twoAtt).grid(row=18+var.get()+1,column=3,sticky="e")
+                else:
+                    playerList[var.get()].up3PtM()
+                    tk.Label(top, text=playerList[var.get()].threeMd).grid(row=18+var.get()+1,column=4,sticky="e")
+                    tk.Label(top, text=playerList[var.get()].threeAtt).grid(row=18+var.get()+1,column=5,sticky="e")
+            canvas.bind("<Button-1>",printcoordsL)
+            canvas.bind("<Button-2>",printcoordsR)
             quitButton.grid(row=3,column=18)
             top.mainloop()
-        #parent.deiconify()
-        self.increment =0
         print("return to main")
     def Load(self,parent):
         print ("Loading Game")
