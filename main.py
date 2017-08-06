@@ -1,12 +1,13 @@
 import Tkinter as tk
 import ttk
-from PIL import ImageTk,Image
+from PIL import ImageTk,Image,ImageDraw,ImageColor,ImageFont
 from team import *
 import sqlite3
 import math
+from game import *
+import os
 conn = sqlite3.connect('roster.db')
 c = conn.cursor()
-c.execute("SELECT * FROM roster")
 
 
 class MainGUI(tk.Frame):
@@ -29,7 +30,7 @@ class MainGUI(tk.Frame):
 
         teamButton = tk.Button(parent,text="Add to Basketball Roster",command=lambda:self.Team(parent),bd = 0)
         createButton = tk.Button(parent,text="Create New Basketball Game",command=lambda:self.Create(parent),bd = 0)
-        loadButton = tk.Button(parent,text="Load Existing Basketball Game",command=lambda:self.Load(parent),bd = 0)
+        loadButton = tk.Button(parent,text="View Season Stats",command=lambda:self.Load(parent),bd = 0)
         viewButton = tk.Button(parent,text = "View Completed Basketball Games",command = lambda:self.View(parent),bd = 0)
 
         teamButton.place(x=240,y=120)
@@ -74,24 +75,31 @@ class MainGUI(tk.Frame):
                     print(newPlayer.firstName + " " + newPlayer.lastName + " #"+ newPlayer.number)
                     self.topDestroy(top)
                     self.tlCount = 0
+                    c.close()
             top.mainloop()
         parent.deiconify()
         print("return to main")
     def Create(self,parent):
         print("Game Created")
+        gameName = ""
         parent.withdraw()
         playerList = []
+        ttlCount=0
         for dbPlayer in dbPlayerList:
             pList = list(dbPlayer)
             x = Team(pList[1],pList[0],pList[2])
             print(x.printInfo())
             playerList.append(x)
-        if(self.tlCount==0):
+        #g1 = Game("PlaguevEurope.db")
+        courtIm = Image.open('court.png')
+        draw = ImageDraw.Draw(courtIm)
+        def createGameWindow(gameObject,conn2,c2,gameName):
+            print("Enter second here")
             parent.withdraw()
             top = tk.Toplevel(parent)
             self.tlCount+=1
             top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
-            top.title("Create a game")
+            top.title("Record Game Stats")
             top.minsize(width=1000,height=750)
             top.resizable(False,False)
             def addRebound():
@@ -147,8 +155,24 @@ class MainGUI(tk.Frame):
                 playerList[var.get()].downFTM()
                 tk.Label(top, text=playerList[var.get()].ftMd).grid(row=18+var.get()+1,column=6,sticky="e")
                 tk.Label(top, text=playerList[var.get()].ftAtt).grid(row=18+var.get()+1,column=7,sticky="e")
-            completeButton = tk.Button(top,text="End Game").grid(row=1,column=18)
-            saveButton = tk.Button(top,text="Save").grid(row=2,column=18)
+            def addOScore():
+                gameObject.upOpp()
+                tk.Label(top, text= gameObject.oppScore).grid(row=6,column=20,sticky="e")
+            def delOScore():
+                gameObject.downOpp()
+                tk.Label(top, text=gameObject.oppScore).grid(row=6,column=20,sticky="e")
+            def updateStats():
+                print (len(playerList))
+                for player in playerList:
+                    c2.execute("INSERT INTO stats VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",(player.firstName,player.lastName,player.number,player.twoAtt,player.threeAtt,player.ftAtt,player.twoMd,player.threeMd,player.ftMd,player.reb,player.stl,player.blk,player.ast,player.to,player.fls,player.pm))
+                    conn2.commit()
+                c2.execute("INSERT INTO final VALUES(?,?)",(gameObject.plageScore,gameObject.oppScore))
+                conn2.commit()
+                self.topDestroy(top)
+            completeButton = tk.Button(top,text="End Game",command=updateStats).grid(row=1,column=18)
+            #saveButton = tk.Button(top,text="Save").grid(row=2,column=18)
+            addOppScore = tk.Button(top,text="Add Point to Opponent",command=addOScore).grid(row=6,column=18)
+            delOppScore = tk.Button(top,text="Delete Point to Opponent",command=delOScore).grid(row=7,column=18)
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
             addReb = tk.Button(top,text="Add Rebound",command=addRebound).grid(row=18-3,column=18)
             delReb = tk.Button(top,text="Delete Rebound",command=delRebound).grid(row=19-3,column=18)
@@ -177,8 +201,12 @@ class MainGUI(tk.Frame):
             stlLabel = tk.Label(top,text="Steals",font = ("AmericanTypewriter-Bold")).grid(row=18,column=9)
             blkLabel = tk.Label(top,text="Blocks",font = ("AmericanTypewriter-Bold")).grid(row=18,column=10)
             astLabel = tk.Label(top,text="Assists",font = ("AmericanTypewriter-Bold")).grid(row=18,column=11)
-            toLabel = tk.Label(top,text="Turnovers",font = ("AmericanTypewriter-Bold")).grid(row=18,column=12)
-            flsLabel = tk.Label(top,text="Fouls",font = ("AmericanTypewriter-Bold")).grid(row=18,column=13)
+            toLabel = tk.Label(top,text="Fouls",font = ("AmericanTypewriter-Bold")).grid(row=18,column=12)
+            flsLabel = tk.Label(top,text="Turnovers",font = ("AmericanTypewriter-Bold")).grid(row=18,column=13)
+            oppScoreLabel = tk.Label(top,text="0").grid(row=6,column=20)
+            usScoreLabel = tk.Label(top,text="0").grid(row=7,column=20)
+            oppLabel = tk.Label(top, text="Opponent Score:").grid(row=6,column=19,sticky="e")
+            usLabel = tk.Label(top,text="Plauge Score:").grid(row=7,column=19)
             canvas = tk.Canvas(top, width = 848, height = 449)
             canvas.grid(row=0,column=0,rowspan=17,columnspan = 17)
             self.img = ImageTk.PhotoImage(Image.open('court.png'))
@@ -187,7 +215,6 @@ class MainGUI(tk.Frame):
             var = tk.IntVar()
             half = tk.IntVar()
             increment = 0
-            index = 0
             def sel():
                 print(playerList[var.get()].printInfo())
             for player in playerList:
@@ -222,8 +249,10 @@ class MainGUI(tk.Frame):
                 b11.grid(row=19+increment,column=12,columnspan=1,sticky="e")
                 b12.grid(row=19+increment,column=13,columnspan=1,sticky="e")
                 increment+=1
-            half1 = tk.Radiobutton(top,text="First Half", value = 1,variable=half).grid(row=3,column=18)
-            half2 = tk.Radiobutton(top,text="Second Half", value = 2,variable=half).grid(row=4,column=18)
+            #half = 1
+            half1 = tk.Radiobutton(top,text="First Half", value = 1,variable=half).grid(row=4,column=18)
+            half2 = tk.Radiobutton(top,text="Second Half", value = 2,variable=half).grid(row=5,column=18)
+            r=10
             def printcoordsL(event):
                 print("LeftClick")
                 print (type(event.x))
@@ -234,6 +263,9 @@ class MainGUI(tk.Frame):
                     print(playerList[var.get()].twoAtt)
                     tk.Label(top, text=playerList[var.get()].twoMd).grid(row=18+var.get()+1,column=2,sticky="e")
                     tk.Label(top, text=playerList[var.get()].twoAtt).grid(row=18+var.get()+1,column=3,sticky="e")
+                    c2.execute("INSERT INTO shots VALUES(?, ?, ?, ?, ?)",(playerList[var.get()].firstName[0:1]+playerList[var.get()].lastName[0:1]+playerList[var.get()].number,event.x,event.y,True,half.get()))
+                    conn2.commit()
+                    print(half.get())
                 else:
                     print("not here")
                     playerList[var.get()].up3Pt()
@@ -241,6 +273,18 @@ class MainGUI(tk.Frame):
                     print(playerList[var.get()].threeAtt)
                     tk.Label(top, text=playerList[var.get()].threeMd).grid(row=18+var.get()+1,column=4,sticky="e")
                     tk.Label(top, text=playerList[var.get()].threeAtt).grid(row=18+var.get()+1,column=5,sticky="e")
+                    c2.execute("INSERT INTO shots VALUES(?, ?, ?, ?, ?)",(playerList[var.get()].firstName[0:1]+playerList[var.get()].lastName[0:1]+playerList[var.get()].number,event.x,event.y,True,half.get()))
+                    conn2.commit()
+                points = 0
+                for player in playerList:
+                    points+=player.calcPts()
+                gameObject.plageScore=points
+                scoreLabel = tk.Label(top,text=gameObject.plageScore).grid(row=7,column=20)
+                draw.ellipse([event.x-r,event.y-r,event.x+r,event.y+r],fill= 'green')
+                draw.text([event.x-r,event.y-r],text=playerList[var.get()].getInitials(),font=ImageFont.load_default())
+                make = canvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='green')
+                canvas.create_text(event.x,event.y,text=playerList[var.get()].getInitials(),font=("Arial",8))
+                courtIm.save(gameName+".png")
             def printcoordsR(event):
                 print("RightClick")
                 print (event.x,event.y)
@@ -248,13 +292,52 @@ class MainGUI(tk.Frame):
                     playerList[var.get()].up2PtM()
                     tk.Label(top, text=playerList[var.get()].twoMd).grid(row=18+var.get()+1,column=2,sticky="e")
                     tk.Label(top, text=playerList[var.get()].twoAtt).grid(row=18+var.get()+1,column=3,sticky="e")
+                    c2.execute("INSERT INTO shots VALUES(?, ?, ?, ?, ?)",(playerList[var.get()].getInitials(),event.x,event.y,False,half.get()))
+                    conn2.commit()
                 else:
                     playerList[var.get()].up3PtM()
                     tk.Label(top, text=playerList[var.get()].threeMd).grid(row=18+var.get()+1,column=4,sticky="e")
                     tk.Label(top, text=playerList[var.get()].threeAtt).grid(row=18+var.get()+1,column=5,sticky="e")
+                    c2.execute("INSERT INTO shots VALUES(?, ?, ?, ?, ?)",(playerList[var.get()].getInitials(),event.x,event.y,False,half.get()))
+                    conn2.commit()
+                draw.ellipse([event.x-r,event.y-r,event.x+r,event.y+r],fill= 'red')
+                draw.text([event.x-r,event.y-r],text=playerList[var.get()].getInitials(),font=ImageFont.load_default())
+                miss = canvas.create_oval(event.x-r, event.y-r, event.x+r, event.y+r, fill='red')
+                canvas.create_text(event.x,event.y,text=playerList[var.get()].getInitials(),font=("Arial",8))
+                courtIm.save(gameName+".png")
             canvas.bind("<Button-1>",printcoordsL)
             canvas.bind("<Button-2>",printcoordsR)
             quitButton.grid(row=3,column=18)
+            top.mainloop()
+        if(self.tlCount==0):
+            top = tk.Toplevel(parent)
+            self.tlCount+=1
+            ttlCount+=1
+            top.title("Create a Game")
+            top.minsize(width=300,height=100)
+            top.resizable(False,False)
+            top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
+            tk.Label(top, text="Enter Game Name").grid(row=0)
+            fN = tk.Entry(top)
+            fN.grid(row=0, column=1)
+            quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
+            quitButton.grid(row = 1,column = 2)
+            submitButton = tk.Button(top,text="Submit",command=lambda:addGame(fN.get()))
+            submitButton.grid(row=1,column = 1)
+            def addGame(gName):
+                if(len(gName)==0) or ( os.path.isfile('Games/'+gName+'.db')):
+                    print("Cannot leave name empty or file exists")
+                else:
+                    newGame = Game(gName)
+                    gameName=gName
+                    print(newGame)
+                    conn2=sqlite3.connect('Games/'+gameName+'.db')
+                    c2=conn2.cursor()
+                    ttlCount=0
+                    top.withdraw()
+                    createGameWindow(newGame,conn2,c2,gameName)
+                    self.tlCount = 0
+                    c.close()
             top.mainloop()
         print("return to main")
     def Load(self,parent):

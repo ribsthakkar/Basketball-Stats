@@ -46,6 +46,8 @@ class Team:
         self.fls = 0
         self.pm = 0
         self.rosterCount+=1
+    def getInitials(self):
+        return self.firstName[0:1]+self.lastName[0:1]+self.number
     def calcPts(self):
         return 2*self.twoMd + 3*self.threeMd + self.ftMd
     def calc3Per(self):
