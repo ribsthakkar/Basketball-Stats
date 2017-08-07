@@ -46,6 +46,16 @@ class Team:
         self.fls = 0
         self.pm = 0
         self.rosterCount+=1
+        self.plusminus=[]
+    def calcPM(self,newItem):
+        self.plusminus.append(newItem)
+        if(len(self.plusminus)%2==0):
+            self.pm+=(self.plusminus[1]-self.plusminus[0])
+            del self.plusminus[:]
+            """i=0
+            while i<len(self.plusminus)-1:
+                self.pm+=(self.plusminus[i+1]-self.plusminus[i])
+                i+=2"""
     def getInitials(self):
         return self.firstName[0:1]+self.lastName[0:1]+self.number
     def calcPts(self):
@@ -68,56 +78,68 @@ class Team:
     def upReb(self):
         self.reb+=1
     def downReb(self):
-        self.reb-=1
+        if(not (self.reb==0)):
+            self.reb-=1
     def upStl(self):
         self.stl+=1
     def downStl(self):
-        self.stl-=1
+        if(not(self.stl==0)):
+            self.stl-=1
     def upBlk(self):
         self.blk+=1
     def downBlk(self):
-        self.blk-=1
+        if(not(self.blk==0)):
+            self.blk-=1
     def upAst(self):
         self.ast+=1
     def downAst(self):
-        self.ast-=1
+        if(not(self.ast==0)):
+            self.ast-=1
     def upFls(self):
         self.fls+=1
     def downFls(self):
-        self.fls-=1
+        if(not(self.fls==0)):
+            self.fls-=1
     def upTo(self):
         self.to+=1
     def downTo(self):
-        self.to-=1
+        if(not(self.to==0)):
+            self.to-=1
     def upFT(self):
         self.ftAtt+=1
         self.ftMd+=1
     def downFT(self):
-        self.ftAtt-=1
-        self.ftMd-=1
+        if(not(self.ftAtt==0)):
+            self.ftAtt-=1
+            self.ftMd-=1
     def upFTM(self):
         self.ftAtt+=1
     def downFTM(self):
-        self.ftAtt-=1
+        if(not(self.ftAtt==0)):
+            self.ftAtt-=1
     def up2Pt(self):
         self.twoAtt+=1
         self.twoMd+=1
     def down2Pt(self):
-        self.twoAtt-=1
-        self.twoMd-=1
+        if(not(self.twAtt==0)):
+            self.twoAtt-=1
+            self.twoMd-=1
     def up2PtM(self):
         self.twoAtt+=1
     def down2PtM(self):
-        self.twoAtt-=1
+        if(not(self.twoAtt==0)):
+            self.twoAtt-=1
     def up3Pt(self):
         self.threeAtt+=1
         self.threeMd+=1
     def down3Pt(self):
-        self.threeAtt-=1
-        self.threeMd-=1
+        if(not(self.threeAtt==0)):
+            self.threeAtt-=1
+            self.threeMd-=1
     def up3PtM(self):
         self.threeAtt+=1
     def down3PtM(self):
-        self.threeAtt-=1
+        if(not(self.threeAtt==0)):
+            self.threeAtt-=1
     def printInfo(self):
         return "Name & Jersey Number: "+ self.firstName+" "+ self.lastName+" #"+self.number

@@ -45,4 +45,5 @@ class Game:
     def upOpp(self):
         self.oppScore+=1
     def downOpp(self):
-        self.oppScore-=1
+        if(not(self.oppScore==0)):
+            self.oppScore-=1
