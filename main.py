@@ -30,8 +30,8 @@ class MainGUI(tk.Frame):
 
         teamButton = tk.Button(parent,text="Add to Basketball Roster",command=lambda:self.Team(parent),bd = 0)
         createButton = tk.Button(parent,text="Create New Basketball Game",command=lambda:self.Create(parent),bd = 0)
-        loadButton = tk.Button(parent,text="View Season Stats",command=lambda:self.Load(parent),bd = 0)
-        viewButton = tk.Button(parent,text = "View Completed Basketball Games",command = lambda:self.View(parent),bd = 0)
+        loadButton = tk.Button(parent,text="View Season Stats",command=lambda:self.Season(parent),bd = 0)
+        viewButton = tk.Button(parent,text = "View Completed Basketball Games",command = lambda:self.Game(parent),bd = 0)
 
         teamButton.place(x=240,y=120)
         createButton.place(x = 240, y = 180)
@@ -62,7 +62,8 @@ class MainGUI(tk.Frame):
 
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
             quitButton.grid(row = 4,column = 4)
-            if(team.rosterCount<=15):
+            tim = Team(None,None,None)
+            if(tim.rosterCount<=15):
                 submitButton = tk.Button(top,text="Submit",command=lambda:addPlayer(fN.get(),lN.get(),jN.get()))
                 submitButton.grid(row=4,column = 2)
             def addPlayer(fName,lName,jNum):
@@ -168,6 +169,9 @@ class MainGUI(tk.Frame):
                     conn2.commit()
                 c2.execute("INSERT INTO final VALUES(?,?)",(gameObject.plageScore,gameObject.oppScore))
                 conn2.commit()
+                for i in range(0,len(dbPlayerList)):
+                    c.execute("UPDATE roster SET  att2=?, att3=?, attf=?, md2=?, md3=?, mdf=?, reb=?, stl=?, blk=?, ast=?, tov=?, fls=?, pms=? WHERE last=?",(dbPlayerList[i][3]+playerList[i].twoAtt,dbPlayerList[i][4]+playerList[i].threeAtt,dbPlayerList[i][5]+playerList[i].ftAtt,dbPlayerList[i][6]+playerList[i].twoMd,dbPlayerList[i][7]+playerList[i].threeMd,dbPlayerList[i][8]+playerList[i].ftMd,dbPlayerList[i][9]+playerList[i].reb,dbPlayerList[i][10]+playerList[i].stl,dbPlayerList[i][11]+playerList[i].blk,dbPlayerList[i][12]+playerList[i].ast,dbPlayerList[i][13]+playerList[i].to,dbPlayerList[i][14]+playerList[i].fls,dbPlayerList[i][15]+playerList[i].pm,dbPlayerList[i][1]))
+                    conn.commit()
                 self.topDestroy(top)
             completeButton = tk.Button(top,text="End Game",command=updateStats).grid(row=1,column=18)
             #saveButton = tk.Button(top,text="Save").grid(row=2,column=18)
@@ -214,6 +218,7 @@ class MainGUI(tk.Frame):
             canvas.create_image(0,0,image=self.img,anchor="nw")
             var = tk.IntVar()
             half = tk.IntVar()
+            half.set(1)
             increment = 0
             def sel():
                 print(playerList[var.get()].printInfo())
@@ -340,31 +345,186 @@ class MainGUI(tk.Frame):
                     c.close()
             top.mainloop()
         print("return to main")
-    def Load(self,parent):
-        print ("Loading Game")
+    def Season(self,parent):
+        print ("Loading Data")
         parent.withdraw()
+        playerList=[]
+        print dbPlayerList
+        for i in range(0,len(dbPlayerList)):
+            x = Team(dbPlayerList[i][1],dbPlayerList[i][0],dbPlayerList[i][2])
+            x.twoAtt=dbPlayerList[i][3]
+            x.threeAtt=dbPlayerList[i][4]
+            x.ftAtt=dbPlayerList[i][5]
+            x.twoMd=dbPlayerList[i][6]
+            x.threeMd=dbPlayerList[i][7]
+            x.ftMd=dbPlayerList[i][8]
+            x.reb=dbPlayerList[i][9]
+            x.stl=dbPlayerList[i][10]
+            x.blk=dbPlayerList[i][11]
+            x.ast=dbPlayerList[i][12]
+            x.to=dbPlayerList[i][13]
+            x.fls=dbPlayerList[i][14]
+            x.pm=dbPlayerList[i][15]
+            print(x.printInfo())
+            playerList.append(x)
+        print(len(playerList))
         if(self.tlCount==0):
             top = tk.Toplevel(parent)
             self.tlCount+=1
-            top.title("Create a Team")
+            top.resizable(False,False)
+            top.title("View The Stats")
             top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
+            increment = 0
+            tk.Label(top,text="Season Stats",font = ("AmericanTypewriter-Bold",45)).grid(row=0,column=0,columnspan=16)
+            tk.Label(top,text="Name/Number",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=0)
+            tk.Label(top,text="2Pt Made",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=1)
+            tk.Label(top,text="2pt Attempt",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=2)
+            tk.Label(top,text="3pt Made",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=3)
+            tk.Label(top,text="3pt Attempt",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=4)
+            tk.Label(top,text="FT Made",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=5)
+            tk.Label(top,text="FT Attempt",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=6)
+            tk.Label(top,text="Points",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=7)
+            tk.Label(top,text="Rebounds",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=8)
+            tk.Label(top,text="Steals",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=9)
+            tk.Label(top,text="Assists",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=10)
+            tk.Label(top,text="Blocks",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=11)
+            tk.Label(top,text="Turnovers",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=12)
+            tk.Label(top,text="Fouls",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=13)
+            tk.Label(top,text="+/-",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=14)
+            tk.Label(top,text="FG%",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=15)
+            tk.Label(top,text="FT%",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=16)
+            for player in playerList:
+                tk.Label(top,text=player.firstName+" "+player.lastName+" #"+player.number,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=0)
+                tk.Label(top,text=player.twoMd,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=1)
+                tk.Label(top,text=player.twoAtt,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=2)
+                tk.Label(top,text=player.threeMd,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=3)
+                tk.Label(top,text=player.threeAtt,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=4)
+                tk.Label(top,text=player.ftMd,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=5)
+                tk.Label(top,text=player.ftAtt,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=6)
+                tk.Label(top,text=player.calcPts(),font = ("AmericanTypewriter",12)).grid(row=2+increment,column=7)
+                tk.Label(top,text=player.reb,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=8)
+                tk.Label(top,text=player.stl,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=9)
+                tk.Label(top,text=player.ast,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=10)
+                tk.Label(top,text=player.blk,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=11)
+                tk.Label(top,text=player.to,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=12)
+                tk.Label(top,text=player.fls,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=13)
+                tk.Label(top,text=player.pm,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=14)
+                tk.Label(top,text=str(player.calcFG())+""+"%",font = ("AmericanTypewriter",12)).grid(row=2+increment,column=15)
+                tk.Label(top,text=str(player.calcFt())+""+"%",font = ("AmericanTypewriter",12)).grid(row=2+increment,column=16)
+                increment+=1
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
-            quitButton.place(x=10,y=10)
+            quitButton.grid(row=increment+3,column=16)
             top.mainloop()
+            c.close()
         parent.deiconify()
         print("return to main")
-    def View(self,parent):
+    def Game(self,parent):
         print("Viewing Game")
+        gameName = ""
         parent.withdraw()
+        playerList = []
+        #ttlCount=0
+        def createGameWindow(dbPlayerList,gameName):
+            print("Enter second here")
+            top = tk.Toplevel(parent)
+            self.tlCount+=1
+            playerList=[]
+            top.resizable(False,False)
+            for dbPlayer in dbPlayerList:
+                pList = list(dbPlayer)
+                x = Team(pList[1],pList[0],pList[2])
+                x.twoAtt=pList[3]
+                x.threeAtt=pList[4]
+                x.ftAtt=pList[5]
+                x.twoMd=pList[6]
+                x.threeMd=pList[7]
+                x.ftMd=pList[8]
+                x.reb=pList[9]
+                x.stl=pList[10]
+                x.blk=pList[11]
+                x.ast=pList[12]
+                x.to=pList[13]
+                x.fls=pList[14]
+                x.pm=pList[15]
+                print(x.printInfo())
+                playerList.append(x)
+            top.title("View The Stats")
+            top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
+            increment = 0
+            tk.Label(top,text=gameName+" Stats",font = ("AmericanTypewriter-Bold",45)).grid(row=0,column=0,columnspan=16)
+            tk.Label(top,text="Name/Number",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=0)
+            tk.Label(top,text="2Pt Made",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=1)
+            tk.Label(top,text="2pt Attempt",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=2)
+            tk.Label(top,text="3pt Made",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=3)
+            tk.Label(top,text="3pt Attempt",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=4)
+            tk.Label(top,text="FT Made",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=5)
+            tk.Label(top,text="FT Attempt",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=6)
+            tk.Label(top,text="Points",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=7)
+            tk.Label(top,text="Rebounds",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=8)
+            tk.Label(top,text="Steals",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=9)
+            tk.Label(top,text="Assists",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=10)
+            tk.Label(top,text="Blocks",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=11)
+            tk.Label(top,text="Turnovers",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=12)
+            tk.Label(top,text="Fouls",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=13)
+            tk.Label(top,text="+/-",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=14)
+            tk.Label(top,text="FG%",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=15)
+            tk.Label(top,text="FT%",font = ("AmericanTypewriter-Bold",15)).grid(row=1,column=16)
+            for player in playerList:
+                tk.Label(top,text=player.firstName+" "+player.lastName+" #"+player.number,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=0)
+                tk.Label(top,text=player.twoMd,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=1)
+                tk.Label(top,text=player.twoAtt,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=2)
+                tk.Label(top,text=player.threeMd,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=3)
+                tk.Label(top,text=player.threeAtt,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=4)
+                tk.Label(top,text=player.ftMd,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=5)
+                tk.Label(top,text=player.ftAtt,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=6)
+                tk.Label(top,text=player.calcPts(),font = ("AmericanTypewriter",12)).grid(row=2+increment,column=7)
+                tk.Label(top,text=player.reb,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=8)
+                tk.Label(top,text=player.stl,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=9)
+                tk.Label(top,text=player.ast,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=10)
+                tk.Label(top,text=player.blk,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=11)
+                tk.Label(top,text=player.to,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=12)
+                tk.Label(top,text=player.fls,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=13)
+                tk.Label(top,text=player.pm,font = ("AmericanTypewriter",12)).grid(row=2+increment,column=14)
+                tk.Label(top,text=str(player.calcFG())+""+"%",font = ("AmericanTypewriter",12)).grid(row=2+increment,column=15)
+                tk.Label(top,text=str(player.calcFt())+""+"%",font = ("AmericanTypewriter",12)).grid(row=2+increment,column=16)
+                increment+=1
+            quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
+            gameImage = Image.open(gameName+'.png')
+            imageHome = ImageTk.PhotoImage(gameImage)
+            backgroundLabel=tk.Label(top,image = imageHome).grid(row=increment+3,column=0,columnspan=16)
+            quitButton.grid(row=increment+4,column=16)
+            top.mainloop()
         if(self.tlCount==0):
             top = tk.Toplevel(parent)
             self.tlCount+=1
-            top.title("Create a Team")
+            ttlCount+=1
+            top.title("Create a Game")
+            top.minsize(width=300,height=100)
+            top.resizable(False,False)
             top.protocol("WM_DELETE_WINDOW", lambda:self.topDestroy(top))
+            tk.Label(top, text="Enter Game Name").grid(row=0)
+            fN = tk.Entry(top)
+            fN.grid(row=0, column=1)
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
-            quitButton.place(x=10,y=10)
+            quitButton.grid(row = 1,column = 2)
+            submitButton = tk.Button(top,text="Submit",command=lambda:addGame(fN.get()))
+            submitButton.grid(row=1,column = 1)
+            def addGame(gName):
+                if(len(gName)==0) or (not os.path.isfile('Games/'+gName+'.db')):
+                    print("Cannot leave name empty or game does not exist")
+                else:
+                    ttlCount=0
+                    top.withdraw()
+                    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+                    db_path = os.path.join(BASE_DIR, "Games/"+gName+".db")
+                    conn3=sqlite3.connect(db_path)
+                    c3=conn3.cursor()
+                    c3.execute("""SELECT * FROM stats""")
+                    dbPlayerList = list(c3.fetchall())
+                    createGameWindow(dbPlayerList,gName)
+                    self.tlCount = 0
+                    c3.close()
             top.mainloop()
-        parent.deiconify()
         print("return to main")
     def topDestroy(self,top):
         top.destroy()

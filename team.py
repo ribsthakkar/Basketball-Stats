@@ -1,5 +1,5 @@
 import sqlite3
-
+import math
 conn = sqlite3.connect('roster.db')
 c = conn.cursor()
 #c.execute("""CREATE TABLE roster (
@@ -52,17 +52,17 @@ class Team:
         return 2*self.twoMd + 3*self.threeMd + self.ftMd
     def calc3Per(self):
         if(self.threeAtt>0):
-            return self.threeMd/self.threeAtt
+            return round(((float(self.threeMd)/float(self.threeAtt)))*100,1)
         else:
             return 0
     def calcFG(self):
         if(self.threeAtt+self.twoAtt>0):
-            return (self.threeMd+self.twoMd)/(self.threeAtt+self.twoAtt)
+            return round((float(self.threeMd+self.twoMd)/float(self.threeAtt+self.twoAtt))*100,1)
         else:
             return 0
     def calcFt(self):
         if(self.ftAtt>0):
-            return ftMd/ftAtt
+            return round((float(self.ftMd)/float(self.ftAtt))*100,1)
         else:
             return 0
     def upReb(self):

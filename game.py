@@ -7,17 +7,12 @@ class Game:
         self.plageScore = 0
         self.oppScore = 0
         self.name = name
-        conn = sqlite3.connect('Games/'+name+'.db')
-        c = conn.cursor()
-        if (not os.path.isfile('Games/'+name+'.db')):
-            c.execute("""CREATE TABLE shots (
-             initials text,
-             xCoord integer,
-             yCoord integer,
-             made boolean,
-             half integer
-             ) """)
+        if (os.path.isfile('Games/'+name+'.db')):
+            conn = sqlite3.connect('Games/'+name+'.db')
+            c = conn.cursor()
         else:
+            conn = sqlite3.connect('Games/'+name+'.db')
+            c = conn.cursor()
             c.execute("""CREATE TABLE shots (
              initials text,
              xCoord integer,
