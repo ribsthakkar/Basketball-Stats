@@ -173,6 +173,10 @@ class MainGUI(tk.Frame):
             def subInOut(diff):
                 playerList[var.get()].calcPM(diff)
                 tk.Label(top, text=playerList[var.get()].pm).grid(row=18+var.get()+1,column=14,sticky="e")
+                if(len(playerList[var.get()].plusminus)==1):
+                    buttonList[var.get()].config(background='green')
+                else:
+                    buttonList[var.get()].config(background='red')
             def addOScore():
                 gameObject.upOpp()
                 tk.Label(top, text= gameObject.oppScore).grid(row=10,column=19,sticky="w")
@@ -245,11 +249,14 @@ class MainGUI(tk.Frame):
             half = tk.IntVar()
             half.set(1)
             increment = 0
+            buttonList=[]
             #For loop used to create the radio button list of each of the players on the roster
             for player in playerList:
                 b = tk.Radiobutton(top, text=player.printInfo(), value=playerList.index(player),variable=var,indicatoron=0)
                 b.grid(row=19+increment,column=0,columnspan=2,sticky="w")
+                b.config(background='red')
                 increment+=1
+                buttonList.append(b)
             increment = 0
             #For loop used to create the labels represeting the player statistics across the board
             for player in playerList:
@@ -353,6 +360,7 @@ class MainGUI(tk.Frame):
             canvas.bind("<Button-1>",printcoordsL)
             canvas.bind("<Button-2>",printcoordsR)
             quitButton.grid(row=3,column=18)
+            courtIm.save(gameName+".png")
             top.mainloop()
         #outside of the createGameWindow method, the following is the first window seen by the user to create the game object and determine the name for the game
         if(self.tlCount==0):
@@ -474,7 +482,7 @@ class MainGUI(tk.Frame):
         parent.withdraw()
         playerList = []
         #viewGameWindow function called to view the statistics of a specific game and the shot chart of the specific game
-        def viewGameWindow(gameScores,dbPlayerList,gameName):
+        def viewGameWindow(gameScores,gameDBPlayerList,gameName):
             print("Enter second here")
             top = tk.Toplevel(parent)
             self.tlCount+=1
@@ -585,7 +593,7 @@ class MainGUI(tk.Frame):
                     c3.execute("""SELECT * FROM final""")
                     gameScores=list(c3.fetchall())
                     #calling the viewGameWindow method passing the sqlite fetched data and the name of the game
-                    viewGameWindow(gameDBPlayerList,gameScores,gName)
+                    viewGameWindow(gameScores,dbPlayerList,gName)
                     self.tlCount = 0
                     c3.close()
             top.mainloop()
