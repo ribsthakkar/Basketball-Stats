@@ -1,7 +1,7 @@
 import Tkinter as tk
 import ttk
 from PIL import ImageTk,Image,ImageDraw,ImageColor,ImageFont
-from team import *
+from player import *
 import sqlite3
 import math
 from game import *
