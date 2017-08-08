@@ -593,7 +593,7 @@ class MainGUI(tk.Frame):
                     c3.execute("""SELECT * FROM final""")
                     gameScores=list(c3.fetchall())
                     #calling the viewGameWindow method passing the sqlite fetched data and the name of the game
-                    viewGameWindow(gameScores,dbPlayerList,gName)
+                    viewGameWindow(gameScores,gameDBPlayerList,gName)
                     self.tlCount = 0
                     c3.close()
             top.mainloop()
