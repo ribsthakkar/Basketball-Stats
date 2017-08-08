@@ -474,7 +474,7 @@ class MainGUI(tk.Frame):
         parent.withdraw()
         playerList = []
         #viewGameWindow function called to view the statistics of a specific game and the shot chart of the specific game
-        def viewGameWindow(dbPlayerList,gameName):
+        def viewGameWindow(gameScores,dbPlayerList,gameName):
             print("Enter second here")
             top = tk.Toplevel(parent)
             self.tlCount+=1
@@ -541,11 +541,15 @@ class MainGUI(tk.Frame):
                 tk.Label(top,text=str(player.calcFG())+""+"%",font = ("AmericanTypewriter",12)).grid(row=2+increment,column=15)
                 tk.Label(top,text=str(player.calcFt())+""+"%",font = ("AmericanTypewriter",12)).grid(row=2+increment,column=16)
                 increment+=1
+            tk.Label(top,text="Plague Score:",font = ("AmericanTypewriter-Bold",15)).grid(row=2,column=18)
+            tk.Label(top,text="Opponent Score:",font = ("AmericanTypewriter-Bold",15)).grid(row=3,column=18)
+            tk.Label(top,text=gameScores[0][0],font = ("AmericanTypewriter",12)).grid(row=2,column=19)
+            tk.Label(top,text=gameScores[0][1],font = ("AmericanTypewriter",12)).grid(row=3,column=19)
             quitButton = tk.Button(top,text="Quit",command=lambda:self.topDestroy(top))
             #importing the image of the shot chart of the game to be viewed underneath the statistics
             gameImage = Image.open(gameName+'.png')
             imageHome = ImageTk.PhotoImage(gameImage)
-            backgroundLabel=tk.Label(top,image = imageHome).grid(row=increment+3,column=0,columnspan=16)
+            backgroundLabel=tk.Label(top,image = imageHome).grid(row=increment+3,column=0,columnspan=19)
             quitButton.grid(row=increment+4,column=16)
             top.mainloop()
         #The check to see no more than one top level window is open. the following code is what is run first to query the name of the game to be viewd before the viewGameWindow function is called for that specified game.
@@ -578,8 +582,10 @@ class MainGUI(tk.Frame):
                     c3=conn3.cursor()
                     c3.execute("""SELECT * FROM stats""")
                     gameDBPlayerList = list(c3.fetchall())
-                    #calling the viewGameWindow method passing the sqlite connection and the name of the game
-                    viewGameWindow(gameDBPlayerList,gName)
+                    c3.execute("""SELECT * FROM final""")
+                    gameScores=list(c3.fetchall())
+                    #calling the viewGameWindow method passing the sqlite fetched data and the name of the game
+                    viewGameWindow(gameDBPlayerList,gameScores,gName)
                     self.tlCount = 0
                     c3.close()
             top.mainloop()
